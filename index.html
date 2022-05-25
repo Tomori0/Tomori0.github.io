@@ -178,7 +178,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-05-23 00:00:00" itemprop="dateModified" datetime="2022-05-23T00:00:00+08:00">2022-05-23</time>
+                <time title="修改时间：2022-05-26 00:00:00" itemprop="dateModified" datetime="2022-05-26T00:00:00+08:00">2022-05-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -348,6 +348,16 @@
 <p>修改配置类</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 关闭csrf防护</span></span><br><span class="line"><span class="comment">// http.csrf().disable();</span></span><br></pre></td></tr></table></figure>
 
+<h2 id="用户授权（访问控制）"><a href="#用户授权（访问控制）" class="headerlink" title="用户授权（访问控制）"></a>用户授权（访问控制）</h2><p>授权的方式包括web授权和方法授权，web授权是通过url拦截进行授权，方法授权是通过方法拦截进行授权。他们都会调用accessDecisionManager进行授权决策，若为web授权则拦截器为FilterSecurityInterceptor；若为方法授权则拦截器为MethodSecurityInterceptor。如果同时通过web授权和方法授权则先执行web授权，再执行方法授权，最后决策通过，则允许访问资源，否则将禁止访问。</p>
+<h3 id="web授权"><a href="#web授权" class="headerlink" title="web授权"></a>web授权</h3><p>Spring Security可以通过 http.authorizeRequests() 对web请求进行授权保护，Spring Security使用标准Filter建立了对web请求的拦截，最终实现对资源的授权访问。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http.authorizeRequests()</span><br><span class="line">        .antMatchers(<span class="string">&quot;/admin/demo&quot;</span>).permitAll() <span class="comment">// 允许访问 /admin/demo</span></span><br><span class="line">        .anyRequest().authenticated(); <span class="comment">// 所有请求都需要认证</span></span><br></pre></td></tr></table></figure>
+<h4 id="访问控制的url匹配"><a href="#访问控制的url匹配" class="headerlink" title="访问控制的url匹配"></a>访问控制的url匹配</h4><p>在配置类中http.authorizeRequests() 主要是对url进行控制。配置顺序会影响之后授权的效果，越是具体的应该放在前面，越是笼统的应该放到后面。</p>
+<h5 id="anyRequest"><a href="#anyRequest" class="headerlink" title="anyRequest()"></a>anyRequest()</h5><p>表示匹配所有的请求。一般情况下此方法都会使用，设置全部内容都需要进行认证，会放在最后。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.anyRequest().authenticated(); <span class="comment">// 所有请求都需要认证</span></span><br></pre></td></tr></table></figure>
+<h5 id="antMatchers"><a href="#antMatchers" class="headerlink" title="antMatchers()"></a>antMatchers()</h5><p>方法定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> C <span class="title function_">antMatchers</span><span class="params">(String... antPatterns)</span></span><br></pre></td></tr></table></figure>
+<p>参数是不定向参数，每个参数是一个 ant 表达式，用于匹配URL规则。<br>ANT通配符有三种：</p>
+<p>|通配符|说明|<br>|?|匹配任何单字符|<br>|*|匹配0或者任意数量的字符|<br>|**|匹配0或者更多的目录|</p>
 
       
     </div>
