@@ -348,16 +348,157 @@
 <p>修改配置类</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 关闭csrf防护</span></span><br><span class="line"><span class="comment">// http.csrf().disable();</span></span><br></pre></td></tr></table></figure>
 
-<h2 id="用户授权（访问控制）"><a href="#用户授权（访问控制）" class="headerlink" title="用户授权（访问控制）"></a>用户授权（访问控制）</h2><p>授权的方式包括web授权和方法授权，web授权是通过url拦截进行授权，方法授权是通过方法拦截进行授权。他们都会调用accessDecisionManager进行授权决策，若为web授权则拦截器为FilterSecurityInterceptor；若为方法授权则拦截器为MethodSecurityInterceptor。如果同时通过web授权和方法授权则先执行web授权，再执行方法授权，最后决策通过，则允许访问资源，否则将禁止访问。</p>
-<h3 id="web授权"><a href="#web授权" class="headerlink" title="web授权"></a>web授权</h3><p>Spring Security可以通过 http.authorizeRequests() 对web请求进行授权保护，Spring Security使用标准Filter建立了对web请求的拦截，最终实现对资源的授权访问。</p>
+<h2 id="用户授权（访问控制）"><a href="#用户授权（访问控制）" class="headerlink" title="用户授权（访问控制）"></a>用户授权（访问控制）</h2><p>授权的方式包括web授权和方法授权，web授权是通过url拦截进行授权，方法授权是通过方法拦截进行授权。他们都会调用<code>accessDecisionManager</code>进行授权决策，若为web授权则拦截器为<code>FilterSecurityInterceptor</code>；若为方法授权则拦截器为<code>MethodSecurityInterceptor</code>。如果同时通过web授权和方法授权则先执行web授权，再执行方法授权，最后决策通过，则允许访问资源，否则将禁止访问。</p>
+<h3 id="web授权"><a href="#web授权" class="headerlink" title="web授权"></a>web授权</h3><p><code>Spring Security</code>可以通过<code>http.authorizeRequests()</code>对web请求进行授权保护，<code>Spring Security</code>使用标准<code>Filter</code>建立了对web请求的拦截，最终实现对资源的授权访问。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http.authorizeRequests()</span><br><span class="line">        .antMatchers(<span class="string">&quot;/admin/demo&quot;</span>).permitAll() <span class="comment">// 允许访问 /admin/demo</span></span><br><span class="line">        .anyRequest().authenticated(); <span class="comment">// 所有请求都需要认证</span></span><br></pre></td></tr></table></figure>
-<h4 id="访问控制的url匹配"><a href="#访问控制的url匹配" class="headerlink" title="访问控制的url匹配"></a>访问控制的url匹配</h4><p>在配置类中http.authorizeRequests() 主要是对url进行控制。配置顺序会影响之后授权的效果，越是具体的应该放在前面，越是笼统的应该放到后面。</p>
+<h4 id="访问控制的url匹配"><a href="#访问控制的url匹配" class="headerlink" title="访问控制的url匹配"></a>访问控制的url匹配</h4><p>在配置类中<code>http.authorizeRequests()</code>主要是对url进行控制。配置顺序会影响之后授权的效果，越是具体的应该放在前面，越是笼统的应该放到后面。</p>
 <h5 id="anyRequest"><a href="#anyRequest" class="headerlink" title="anyRequest()"></a>anyRequest()</h5><p>表示匹配所有的请求。一般情况下此方法都会使用，设置全部内容都需要进行认证，会放在最后。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.anyRequest().authenticated(); <span class="comment">// 所有请求都需要认证</span></span><br></pre></td></tr></table></figure>
 <h5 id="antMatchers"><a href="#antMatchers" class="headerlink" title="antMatchers()"></a>antMatchers()</h5><p>方法定义如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> C <span class="title function_">antMatchers</span><span class="params">(String... antPatterns)</span></span><br></pre></td></tr></table></figure>
-<p>参数是不定向参数，每个参数是一个 ant 表达式，用于匹配URL规则。<br>ANT通配符有三种：</p>
-<p>|通配符|说明|<br>|?|匹配任何单字符|<br>|*|匹配0或者任意数量的字符|<br>|**|匹配0或者更多的目录|</p>
+<p>参数是不定向参数，每个参数是一个<code>ant</code>表达式，用于匹配URL规则。<br>ANT通配符有三种：</p>
+<table>
+<thead>
+<tr>
+<th>通配符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>?</td>
+<td>匹配任何单字符</td>
+</tr>
+<tr>
+<td>*</td>
+<td>匹配0或者任意数量的字符</td>
+</tr>
+<tr>
+<td>**</td>
+<td>匹配0或者更多的目录</td>
+</tr>
+</tbody></table>
+<p>在实际项目中经常需要放行所有静态资源：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 放行 js和css 目录下所有的文件</span></span><br><span class="line">.antMatchers(<span class="string">&quot;/js/**&quot;</span>,<span class="string">&quot;/css/**&quot;</span>).permitAll()</span><br><span class="line"><span class="comment">// 只要是.js 文件都放行</span></span><br><span class="line">.antMatchers(<span class="string">&quot;/**/*.js&quot;</span>).permitAll()</span><br></pre></td></tr></table></figure>
+<h5 id="regexMatchers"><a href="#regexMatchers" class="headerlink" title="regexMatchers()"></a>regexMatchers()</h5><p>使用正则表达式进行匹配。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//所有以.js 结尾的文件都被放行</span></span><br><span class="line">.regexMatchers(<span class="string">&quot;.+[.]js&quot;</span>).permitAll()</span><br></pre></td></tr></table></figure>
+
+<p>无论是<code>antMatchers()</code>还是<code>regexMatchers()</code>都具有两个参数的方法，其中第一个参数都是<code>HttpMethod</code>，表示请求方式，当设置了<code>HttpMethod</code>后表示只有设定的特定的请求方式才执行对应的权限设置。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.antMatchers(HttpMethod.POST,<span class="string">&quot;/admin/demo&quot;</span>).permitAll()</span><br><span class="line">.regexMatchers(HttpMethod.GET,<span class="string">&quot;.+[.]jpg&quot;</span>).permitAll()</span><br></pre></td></tr></table></figure>
+<h5 id="mvcMatchers"><a href="#mvcMatchers" class="headerlink" title="mvcMatchers()"></a>mvcMatchers()</h5><p>适用于配置了<code>servletPath</code>的情况。<code>servletPath</code>就是所有的<code>URL</code>的统一前缀。在<code>SpringBoot</code>整合<code>SpringMVC</code>的项目中可以在<code>application.yml</code>中添加下面内容设置<code>ServletPath</code>。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">mvc:</span></span><br><span class="line">    <span class="attr">servlet:</span></span><br><span class="line">      <span class="attr">path:</span> <span class="string">/web</span></span><br></pre></td></tr></table></figure>
+<p>在<code>Spring Security</code>的配置类中配置<code>.servletPath()</code>是<code>mvcMatchers()</code>返回值特有的方法，<code>antMatchers()</code>和<code>regexMatchers()</code>没有这个方法。在<code>servletPath()</code>中配置了<code>servletPath</code>后，<code>mvcMatchers()</code>直接写<code>SpringMVC</code>中<code>@RequestMapping()</code>中设置的路径即可。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.mvcMatchers(<span class="string">&quot;/admin/demo&quot;</span>).servletPath(<span class="string">&quot;/web&quot;</span>).permitAll()</span><br></pre></td></tr></table></figure>
+<p>如果不习惯使用<code>mvcMatchers()</code>也可以使用<code>antMatchers()</code>，下面代码和上面代码是等效的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.antMatchers(<span class="string">&quot;/web/admin/demo&quot;</span>).permitAll()</span><br></pre></td></tr></table></figure>
+<h4 id="RequestMatcher接口"><a href="#RequestMatcher接口" class="headerlink" title="RequestMatcher接口"></a>RequestMatcher接口</h4><p><code>RequestMatcher</code>是<code>Spring Security Web</code>的一个概念模型接口，用于抽象建模对<code>HttpServletRequest</code>请求的匹配器这一概念。<code>Spring Security</code>内置提供了一些<code>RequestMatcher</code>实现类：</p>
+<table>
+<thead>
+<tr>
+<th>实现类</th>
+<th>介绍</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AnyRequestMatcher</td>
+<td>匹配任何请求</td>
+</tr>
+<tr>
+<td>AntPathRequestMatcher</td>
+<td>使用 ant 风格的路径匹配模板匹配请求</td>
+</tr>
+<tr>
+<td>ELRequestMatcher</td>
+<td>使用 EL 表达式匹配请求</td>
+</tr>
+<tr>
+<td>IpAddressMatcher</td>
+<td>基于 IP 地址匹配请求，支持 IPv4 和 IPv6</td>
+</tr>
+<tr>
+<td>MediaTypeRequestMatcher</td>
+<td>基于 MediaType 匹配请求</td>
+</tr>
+<tr>
+<td>RegexRequestMatcher</td>
+<td>基于正则表达式匹配请求</td>
+</tr>
+<tr>
+<td>RequestHeaderRequestMatcher</td>
+<td>基于头部值比较匹配请求</td>
+</tr>
+<tr>
+<td>AndRequestMatcher</td>
+<td>and 组合多个 RequestMatcher</td>
+</tr>
+<tr>
+<td>OrRequestMatcher</td>
+<td>or 组合多个 RequestMatcher</td>
+</tr>
+<tr>
+<td>NegatedRequestMatcher</td>
+<td>not 操作一个 RequestMatcher</td>
+</tr>
+<tr>
+<td>MvcRequestMatcher</td>
+<td>使用 Spring MVC 的 HandlerMappingIntrospector 匹配请求</td>
+</tr>
+</tbody></table>
+<h4 id="内置的访问控制"><a href="#内置的访问控制" class="headerlink" title="内置的访问控制"></a>内置的访问控制</h4><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><mark>permitAll()</mark></td>
+<td>所有用户可访问</td>
+</tr>
+<tr>
+<td><mark>denyAll()</mark></td>
+<td>所有用户不可访问</td>
+</tr>
+<tr>
+<td><mark>authenticated()</mark></td>
+<td>登录用户可访问</td>
+</tr>
+<tr>
+<td>anonymous()</td>
+<td>无需登录，即匿名用户可访问</td>
+</tr>
+<tr>
+<td>rememberMe()</td>
+<td>通过 remember me登录的用户可访问</td>
+</tr>
+<tr>
+<td>fullyAuthenticated()</td>
+<td>非 remember me 登录的用户可访问</td>
+</tr>
+<tr>
+<td>hasIpAddress(String ipaddressExpression)</td>
+<td>来自指定 IP 表达式的用户可访问</td>
+</tr>
+<tr>
+<td><mark>hasRole(String role)</mark></td>
+<td>拥有指定角色的用户可访问，角色将被增加 “ROLE_”前缀</td>
+</tr>
+<tr>
+<td><mark>hasAnyRole(String… roles)</mark></td>
+<td>拥有指定任一角色的用户可访问</td>
+</tr>
+<tr>
+<td><mark>hasAuthority(String authority)</mark></td>
+<td>拥有指定权限( authority )的用户可访问</td>
+</tr>
+<tr>
+<td><mark>hasAuthority(String… authorities)</mark></td>
+<td>拥有指定任一权限( authority )的用户可访问</td>
+</tr>
+<tr>
+<td><mark>access(String attribute)</mark></td>
+<td>当 Spring EL 表达式的执行结果为 true 时，可以访问。</td>
+</tr>
+</tbody></table>
 
       
     </div>
